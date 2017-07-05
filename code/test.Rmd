@@ -1,0 +1,162 @@
+---
+title: "Workshop"
+author: "Xiao Feng"
+date: "July 4, 2017"
+output: html_document
+---
+
+```{r setup}
+# load librarys
+library(dismo)
+library(raster)
+library(knitr)
+knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
+
+
+```
+
+
+```{r load rasters}
+clim <- list.files("data/bioclim/",pattern=".bil$",full.names = T)
+clim <- stack(clim)
+
+```
+
+
+
+```{r prepare, message=TRUE, warning=FALSE}
+#file.exists()
+
+if(file.exists("data/occ_raw")){
+  #cat(1)
+  load("data/occ_raw")
+  
+}else{
+  #cat(2)
+  occ_raw <- gbif("Dasypus novemcinctus")
+  save(occ_raw,file = "data/occ_raw")
+  write.csv("data/occ_raw.csv")
+}
+
+head(occ_raw)
+```
+
+```{r clean data}
+# remove bad coordinates
+occ_clean <- subset(occ_raw,(!is.na(lat))&(!is.na(lon)))
+cat(nrow(occ_raw)-nrow(occ_clean), "records are removed")
+
+# remove duplicated data
+dups <- duplicated(occ_clean[c("lat","lon")])
+occ_unique <- occ_clean[!dups,]
+cat(nrow(occ_clean)-nrow(occ_unique), "records are removed")
+
+# make occ spatial
+coordinates(occ_unique) <- ~ lon + lat
+plot(occ_unique)
+
+# remove some errors
+occ_unique <- occ_unique[which(occ_unique$lon>-110 &
+                                 occ_unique$lon < -40),]
+
+# make occ sparse (keep one occ per cell)
+cells <- cellFromXY(clim[[1]],occ_unique)
+dups <- duplicated(cells)
+occ_final <- occ_unique[!dups,]
+cat(nrow(occ_unique)-nrow(occ_final), "records are removed")
+
+plot(clim[[1]])
+plot(occ_final,add=T,col="red")
+
+
+```
+
+```{r set up study area}
+occ_buff <- buffer(occ_final,4) # 4 decimal degree
+plot(clim[[1]])
+plot(occ_final,add=T,col="red")
+plot(occ_buff,add=T,col="blue")
+
+# select background points from this buffered area
+studyArea <- crop(clim,extent(occ_buff))
+studyArea <- mask(studyArea,occ_buff)
+
+# save the buffer areas into raster files
+writeRaster(studyArea,
+            filename=paste0("data/studyarea/",names(studyArea),".asc"),
+            format="ascii",
+            bylayer=TRUE,
+            overwrite=T)
+
+set.seed(1) # this will guarantee the same random sample...
+bg <- sampleRandom(x=studyArea,size=10000,na.rm=T,sp=T)
+plot(studyArea[[1]])
+plot(bg,add=T)
+plot(occ_final,add=T,col="red")
+
+```
+
+
+```{r cut occ into training & testing}
+# randomly select 50% for training
+set.seed(1)
+selected <- sample(1:nrow(occ_final),nrow(occ_final)*0.5)
+occ_train <- occ_final[selected,]
+occ_test <- occ_final[-selected,]
+
+```
+
+
+
+
+```{r prepare data for maxent}
+p <- extract(clim,occ_train) # env conditions for training occ
+p_test <- extract(clim,occ_test) # env conditions for testing occ
+a <- extract(clim,bg)
+pa <- c(rep(1,nrow(p)), rep(0,nrow(a)))
+pder <- as.data.frame(rbind(p,a))
+mod <- maxent(x=pder, # env conditions
+              p=pa,   # 1:presence or 0:absence
+              path=paste0(getwd(),"/maxent_outputs"), #folder to store maxent output
+              args=c("responsecurves") # a lot of parameters can be specified here
+              )
+
+# view a maxent model in a html brower
+mod
+
+# view detailed results
+mod@results
+```
+
+```{r predict}
+# a maxent model (in R) can be projected a raster layers, or dataframes
+
+# example 1, project to out study area [raster]
+ped1 <- predict(mod,studyArea)
+plot(ped1)
+
+# example 2, project to the world
+#ped2 <- predict(mod,clim)
+#plot(ped2)
+
+# example 3, project training occurrences [dataframes]
+ped3 <- predict(mod,p)
+head(ped3)
+hist(ped3)
+
+```
+
+```{r model evaluation}
+# using "training data" to evaluate 
+mod_eval_train <- dismo::evaluate(p=p,a=a,model=mod)  #p & a are dataframes
+print(mod_eval_train)
+mod_eval_test <- dismo::evaluate(p=p_test,a=a,model=mod)  
+print(mod_eval_test) # training AUC may be higher than testing AUC
+
+# calculate thresholds of models
+thd1 <- threshold(mod_eval_train,"no_omission") # 0% omission rate [minimum training presence]
+thd2 <- threshold(mod_eval_train,"spec_sens") # hiest TSS
+
+plot(ped1>=thd1)
+```
+
