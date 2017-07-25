@@ -1,0 +1,16 @@
+TY  - JOUR
+T1  - sdm: a reproducible and extensible R platform for species distribution modelling
+A1  - Naimi, Babak
+A1  - Araújo, Miguel B.
+Y1  - 2016/04//
+JF  - Ecography
+VL  - 39
+IS  - 4
+SP  - 368
+EP  - 375
+SN  - 6503251521
+DO  - 10.1111/ecog.01881
+UR  - http://doi.wiley.com/10.1111/ecog.01881
+L1  - file:///D:/literature/mendeley_2016.6/2016/Naimi, Araújo_2016_sdm a reproducible and extensible R platform for species distribution modelling.pdf
+N2  - sdm is an object-oriented, reproducible and extensible, platform for species distribution modelling. It uses individual species and community-based approaches, enabling ensembles of models to be fi tted and evaluated, to project species potential distributions in space and time. It provides a standardized and unifi ed structure for handling species distributions data and modelling techniques, and supports markedly diff erent modelling approaches, including correlative, process- based (mechanistic), agent-based, and cellular automata. Th e object-oriented design of software is such that scientists can modify existing methods, extend the framework by developing new methods or modelling procedures, and share them to be reproduced by other scientists. sdm can handle spatial and temporal data for single or multiple species and uses high performance computing solutions to speed up modelling and simulations. Th e framework is implemented in R, providing a fl exible and easy-to-use GUI interface. Species
+ER  - 

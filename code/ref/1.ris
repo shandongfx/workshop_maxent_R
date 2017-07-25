@@ -1,0 +1,19 @@
+TY  - JOUR
+T1  - mMWeb - An Online Platform for Employing Multiple Ecological Niche Modeling Algorithms
+A1  - Qiao, Huijie
+A1  - Lin, Congtian
+A1  - Ji, Liqiang
+A1  - Jiang, Zhigang
+ED  - Sueur, Cédric
+Y1  - 2012/08//
+JF  - PLoS ONE
+VL  - 7
+IS  - 8
+SP  - e43327
+EP  - e43327
+SN  - 10.1371/journal.pone.0043327
+DO  - 10.1371/journal.pone.0043327
+UR  - http://dx.plos.org/10.1371/journal.pone.0043327
+L1  - file:///D:/literature/mendeley_2016.6/2012/Qiao et al._2012_mMWeb - An Online Platform for Employing Multiple Ecological Niche Modeling Algorithms.PDF
+N2  - BACKGROUND: Predicting the ecological niche and potential habitat distribution of a given organism is one of the central domains of ecological and biogeographical research. A wide variety of modeling techniques have been developed for this purpose. In order to implement these models, the users must prepare a specific runtime environment for each model, learn how to use multiple model platforms, and prepare data in a different format each time. Additionally, often model results are difficult to interpret, and a standardized method for comparing model results across platforms does not exist. We developed a free and open source online platform, the multi-models web-based (mMWeb) platform, to address each of these problems, providing a novel environment in which the user can implement and compare multiple ecological niche model (ENM) algorithms. METHODOLOGY: mMWeb combines 18 existing ENMs and their corresponding algorithms and provides a uniform procedure for modeling the potential habitat niche of a species via a common web browser. mMWeb uses Java Native Interface (JNI), Java R Interface to combine the different ENMs and executes multiple tasks in parallel on a super computer. The cross-platform, user-friendly interface of mMWeb simplifies the process of building ENMs, providing an accessible and efficient environment from which to explore and compare different model algorithms.
+ER  - 
