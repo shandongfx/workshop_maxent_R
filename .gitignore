@@ -2,4 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-maxent_outputs
+maxent_output*
+manuscript/
