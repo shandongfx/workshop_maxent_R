@@ -1,6 +1,4 @@
-
-
-
+# a function that takes Maxent parameters following the general R manner
 prepPara <- function(para_userfeatures=NULL, #NULL=autofeature, could be any combination of # c("L", "Q", "H", "H", "P")
                      para_responsecurve=TRUE,
                      para_jackknife=TRUE,      
@@ -89,39 +87,3 @@ prepPara <- function(para_userfeatures=NULL, #NULL=autofeature, could be any com
   
   return(args_out)
 }
-
-# mod1 <- maxent(x=pder[c("bio1","bio4","bio11")], p=pa,
-#               path=paste0(getwd(),"/maxent_outputs1"),
-#               args=c( 
-#                 prepPara(para_userfeatures="LQ", 
-#                          para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea",
-#                          para_betamultiplier=8) ))
-# mod2 <- maxent(x=pder[c("bio1","bio4","bio11")], p=pa,
-#               path=paste0(getwd(),"/maxent_outputs2"),
-#               args=c( 
-#                 prepPara(para_userfeatures="LQ", 
-#                          para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea",
-#                          para_betamultiplier=0.1
-#                 ) ))
-# mod3 <- maxent(x=pder[c("bio1","bio4","bio11")], p=pa,
-#                path=paste0(getwd(),"/maxent_outputs3"),
-#                args=c( 
-#                  prepPara(para_userfeatures="LQH", 
-#                           para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea",
-#                           para_betamultiplier=0.5
-#                  ) ))
-# mod4 <- maxent(x=pder[c("bio1","bio4","bio11")], p=pa,
-#                path=paste0(getwd(),"/maxent_outputs4"),
-#                args=c( 
-#                  prepPara(para_userfeatures="LQH", 
-#                           para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea",
-#                           beta_lqp=2,beta_hinge=3
-#                  ) ))
-# l1 <- raster("maxent_outputs1/species_studyarea.asc")
-# l2 <- raster("maxent_outputs2/species_studyarea.asc")
-# plot(stack(l1,l2))
-# plot(l1-l2)
-# 
-# l3 <- raster("maxent_outputs3/species_studyarea.asc")
-# l4 <- raster("maxent_outputs4/species_studyarea.asc")
-# plot(stack(l3,l4))
