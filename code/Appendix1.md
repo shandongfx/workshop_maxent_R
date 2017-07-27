@@ -1,54 +1,56 @@
 # A brief tutorial on runing Maxent in R
 Xiao Feng, Cassondra Walker, Fikirte Gebresenbet  
 July 4, 2017  
-##1. setup the working environment  
-###1.1 load packages  
+##1. Setup the working environment  
+###1.1 Load packages  
 
 ```r
 library(dismo)
 library(raster)
 library(knitr)
+require(rgeos)
+require(rJava)
 knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
 ```
 
-###1.2 set up the Maxent path  
+###1.2 Set up the Maxent path  
 
 ```r
 # download maxent.jar 3.3.3k, and place the file in the desired folder
 utils::download.file(url="https://raw.githubusercontent.com/mrmaxent/Maxent/master/ArchivedReleases/3.3.3k/maxent.jar",destfile=paste0(system.file("java", package="dismo"),"/maxent.jar"),
                      mode="wb") ## wb for binary file, otherwise maxent.jar can not execute
 # also note that both R and Java need to be the same bit (either 32 or 64) to be compatible to run
+
+#options( java.parameters = c("-Xss2560k", "-Xmx2g") ) ## increase memory size of the JVM, this code may prevent memory issues of Maxent.jar
 ```
 
-##2. prepare data input  
-###2.1 load environmental layers  
+##2. Prepare data input  
+###2.1 Load environmental layers  
 
 ```r
-# load GIS layers
+# load GIS layers; here we used bioclim variables as an example (downloaded from worldclim.org)
 clim <- list.files("data/bioclim/",pattern=".bil$",full.names = T)
 clim <- stack(clim) ## stacking the bioclim variables to process them at one go
 ```
 
-###2.2 occurrence data  
-###2.2.1 download occurrence data  
+###2.2 Occurrence data  
+###2.2.1 Download occurrence data  
 
 ```r
-# download occurrence data from GBIF
+# download occurrence data from GBIF; for example, we used nine-banded armadillo that distributes in America
 if(file.exists("data/occ_raw")){
   #cat(1)
   load("data/occ_raw")
-  
 }else{
   #cat(2)
   occ_raw <- gbif("Dasypus novemcinctus")
   save(occ_raw,file = "data/occ_raw")
   write.csv("data/occ_raw.csv")
 }
-
 #head(occ_raw)
 ```
 
-###2.2.2 clean occurrence data
+###2.2.2 Clean occurrence data
 
 ```r
 # remove bad coordinates, where either the lat or long coordinate is missing
@@ -102,18 +104,11 @@ plot(occ_final,add=T,col="red") ## the 'add=T' tells R to put the incoming data 
 
 ![](Appendix1_files/figure-html/clean data-2.png)<!-- -->
 
-###2.3 set up study area
+###2.3 Set up study area
 
 ```r
 # this creates a buffer around the occurence data 
 occ_buff <- buffer(occ_final,4) ## 4 decimal degree
-```
-
-```
-## Loading required namespace: rgeos
-```
-
-```r
 plot(clim[[1]]) ## this plots the first element ([[1]]) in the raster stack and adds the occurence data
 plot(occ_final,add=T,col="red") ## this adds the occurrence data
 plot(occ_buff,add=T,col="blue") ## this adds the buffer polygon
@@ -148,7 +143,7 @@ plot(occ_final,add=T,col="red") ## add the occurrence data to the plottted raste
 
 ![](Appendix1_files/figure-html/set up study area-2.png)<!-- -->
 
-###2.4 split occurrence data into training & testing
+###2.4 Split occurrence data into training & testing
 
 ```r
 # randomly select 50% for training
@@ -158,7 +153,7 @@ occ_train <- occ_final[selected,] ## this is the selection
 occ_test <- occ_final[-selected,] ## this is the opposite of the selection
 ```
 
-###2.5 format data for Maxent
+###2.5 Format data for Maxent
 
 ```r
 # extracting env conditions for training occ from the raster stack; a data frame is returned 
@@ -173,21 +168,14 @@ pder <- as.data.frame(rbind(p,a)) ## this makes a data frame with the environmen
 ```
 
 ##3 Maxent models
-###3.1 simple implementation
+###3.1 Simple implementation
 
 ```r
 mod <- maxent(x=pder, ## env conditions
               p=pa,   ## 1:presence or 0:absence
-              path=paste0(getwd(),"/maxent_outputs"), ## folder to store maxent output; if we do not specify a folder R will put the results in a temp file, and it gets messy to read those. . .
+              path=paste0(getwd(),"/output/maxent_outputs"), ## folder to store maxent output; if we do not specify a folder R will put the results in a temp file, and it gets messy to read those. . .
               args=c("responsecurves") ## a lot of parameters can be specified here
               )
-```
-
-```
-## Loading required namespace: rJava
-```
-
-```r
 ## the maxent functions runs a model in the default settings..to change these parameters, you have to tell it what you want...i.e. response curves or the the type of features
 
 # view a maxent model in a html brower
@@ -290,7 +278,7 @@ mod@results
 ## Equate.entropy.of.thresholded.and.original.distributions.training.omission             0.0534
 ```
 
-###3.2 predict function
+###3.2 Predict function
 
 ```r
 # maxent.R doesnt give us a prediction of training data/layers (unless you specify the projection layers in the "args""), the alternative is to use the predict function 
@@ -323,7 +311,7 @@ hist(ped3)
 
 ![](Appendix1_files/figure-html/predict-2.png)<!-- -->
 
-###3.3 model evaluation
+###3.3 Model evaluation
 
 ```r
 # using "training data" to evaluate 
@@ -369,7 +357,7 @@ plot(ped1>=thd1)  ## plotting points that are above the previously calculated tr
 ![](Appendix1_files/figure-html/model evaluation-1.png)<!-- -->
 
 ##4 Maxent parameters
-###4.1 select features
+###4.1 Select features
 
 ```r
 # load the function that prepares parameters for maxent
@@ -377,46 +365,46 @@ source("code/Appendix2_prepPara.R")
 
 mod1_autofeature <- maxent(x=pder[c("bio1","bio4","bio11")], ## env conditions, here we selected only 3 predictors
                p=pa, ## 1:presence or 0:absence
-              path=paste0(getwd(),"/maxent_outputs1_auto"), ## path of maxent output, this is the folder you will find manxent output
-              args=prepPara(para_userfeatures=NULL) )  ## default is autofeature
+              path=paste0(getwd(),"/output/maxent_outputs1_auto"), ## path of maxent output, this is the folder you will find manxent output
+              args=prepPara(userfeatures=NULL) )  ## default is autofeature
               
 # or select Linear& Quadratic features
 mod1_lq <- maxent(x=pder[c("bio1","bio4","bio11")], ## env conditions, here we selected only 3 predictors
                p=pa, ## 1:presence or 0:absence
-              path=paste0(getwd(),"/maxent_outputs1_lq"), ## path of maxent output, this is the folder you will find manxent output
-              args=prepPara(para_userfeatures="LQ") )  ## default is autofeature, here LQ represents Linear& Quadratic (L-linear, Q-Quadratic, H-Hinge, P-Product, T-Threshold)
+              path=paste0(getwd(),"/output/maxent_outputs1_lq"), ## path of maxent output, this is the folder you will find manxent output
+              args=prepPara(userfeatures="LQ") )  ## default is autofeature, here LQ represents Linear& Quadratic (L-linear, Q-Quadratic, H-Hinge, P-Product, T-Threshold)
 ```
 
-###4.2 change beta-multiplier
+###4.2 Change beta-multiplier
 
 ```r
 #change betamultiplier for all features
 mod2 <- maxent(x=pder[c("bio1","bio4","bio11")], 
                p=pa, 
-              path=paste0(getwd(),"/maxent_outputs2_o.5"), 
-              args=prepPara(para_userfeatures="LQ",
-                            para_betamultiplier=0.5) ) 
+              path=paste0(getwd(),"/output/maxent_outputs2_o.5"), 
+              args=prepPara(userfeatures="LQ",
+                            betamultiplier=0.5) ) 
 
 mod2 <- maxent(x=pder[c("bio1","bio4","bio11")], 
                p=pa, 
-              path=paste0(getwd(),"/maxent_outputs2_complex"), 
-              args=prepPara(para_userfeatures="LQH", ## include L, Q, H features
+              path=paste0(getwd(),"/output/maxent_outputs2_complex"), 
+              args=prepPara(userfeatures="LQH", ## include L, Q, H features
                             beta_lqp=1.5, ## use different betamultiplier for different features
                             beta_hinge=0.5 ) ) 
 ```
 
-###4.3 specify projection layers
+###4.3 Specify projection layers
 
 ```r
 # note: 1)the projection layers must exist in the hard disk (as relative to computer RAM); (2) the names of the layers (excluding the name extension) must match the names of the predictor variables; 
 mod3 <- maxent(x=pder[c("bio1","bio11")], 
                p=pa, 
-              path=paste0(getwd(),"/maxent_outputs3_prj1"), 
-              args=prepPara(para_userfeatures="LQ",
-                            para_betamultiplier=1,                      para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea") ) 
+              path=paste0(getwd(),"/output/maxent_outputs3_prj1"), 
+              args=prepPara(userfeatures="LQ",
+                            betamultiplier=1,                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea") ) 
 
 # load the projected map
-ped <- raster(paste0(getwd(),"/maxent_outputs3_prj1/species_studyarea.asc"))
+ped <- raster(paste0(getwd(),"/output/maxent_outputs3_prj1/species_studyarea.asc"))
 plot(ped)
 ```
 
@@ -426,11 +414,11 @@ plot(ped)
 # we can also project on a broader map, but please caustion about the inaccuracy associated with model extrapolation.
 mod3 <- maxent(x=pder[c("bio1","bio11")], 
                p=pa, 
-              path=paste0(getwd(),"/maxent_outputs3_prj2"), 
-              args=prepPara(para_userfeatures="LQ",
-                            para_betamultiplier=1,                      para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+              path=paste0(getwd(),"/output/maxent_outputs3_prj2"), 
+              args=prepPara(userfeatures="LQ",
+                            betamultiplier=1,                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 # plot the map
-ped <- raster(paste0(getwd(),"/maxent_outputs3_prj2/species_bioclim.asc"))
+ped <- raster(paste0(getwd(),"/output/maxent_outputs3_prj2/species_bioclim.asc"))
 plot(ped)
 ```
 
@@ -440,38 +428,39 @@ plot(ped)
 # simply check the difference if we used a different betamultiplier
 mod3_beta1 <- maxent(x=pder[c("bio1","bio11")], 
                p=pa, 
-              path=paste0(getwd(),"/maxent_outputs3_prj3"), 
-              args=prepPara(para_userfeatures="LQ",
-                            para_betamultiplier=100, ## for an extreme example, set beta as 100
-                            para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
-ped3 <- raster(paste0(getwd(),"/maxent_outputs3_prj3/species_bioclim.asc"))
+              path=paste0(getwd(),"/output/maxent_outputs3_prj3"), 
+              args=prepPara(userfeatures="LQ",
+                            betamultiplier=100, ## for an extreme example, set beta as 100
+                            projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+ped3 <- raster(paste0(getwd(),"/output/maxent_outputs3_prj3/species_bioclim.asc"))
 plot(ped-ped3) ## quickly check the difference between the two predictions
 ```
 
 ![](Appendix1_files/figure-html/specify projection layers/data table-3.png)<!-- -->
 
-###4.4 clamping function
+###4.4 Clamping function
 
 ```r
 # enable or disable clamping function; note clamping function is involved when projecting
-mod4_clamp <- maxent(x=pder[c("bio1","bio11")], 
-               p=pa, 
-              path=paste0(getwd(),"/maxent_outputs4_clamp"), 
-              args=prepPara(para_userfeatures="LQ",
-                            para_betamultiplier=1,
-                            para_doclamp = TRUE,
-                            para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+mod4_clamp <- maxent(x=pder[c("bio1","bio11")],
+                     p=pa,
+                     path=paste0(getwd(),"/output/maxent_outputs4_clamp"), 
+                     args=prepPara(userfeatures="LQ",
+                                   betamultiplier=1,
+                                   doclamp = TRUE,
+                                   projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim")) 
 
 mod4_noclamp <- maxent(x=pder[c("bio1","bio11")], 
-               p=pa, 
-              path=paste0(getwd(),"/maxent_outputs4_noclamp"), 
-              args=prepPara(para_userfeatures="LQ",
-                            para_betamultiplier=1,
-                            para_doclamp = FALSE,
-                            para_projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+                       p=pa, 
+                       path=paste0(getwd(),"/output/maxent_outputs4_noclamp"),
+                       args=prepPara(userfeatures="LQ",
+                                      betamultiplier=1,
+                                      doclamp = FALSE,
+                                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 
-ped_clamp <- raster(paste0(getwd(),"/maxent_outputs4_clamp/species_bioclim.asc") )
-ped_noclamp <- raster(paste0(getwd(),"/maxent_outputs4_noclamp/species_bioclim.asc") )
+
+ped_clamp <- raster(paste0(getwd(),"/output/maxent_outputs4_clamp/species_bioclim.asc") )
+ped_noclamp <- raster(paste0(getwd(),"/output/maxent_outputs4_noclamp/species_bioclim.asc") )
 plot(stack(ped_clamp,ped_noclamp))
 ```
 
@@ -482,4 +471,17 @@ plot(ped_clamp - ped_noclamp) ## we may notice small difference, especially clam
 ```
 
 ![](Appendix1_files/figure-html/clamping function-2.png)<!-- -->
+
+###4.5 Cross validation
+
+```r
+mod4_cross <- maxent(x=pder[c("bio1","bio11")], p=pa, 
+                            path=paste0(getwd(),"/output/maxent_outputs4_cross"), 
+                            args=prepPara(userfeatures="LQ",
+                                          betamultiplier=1,
+                                          doclamp = TRUE,
+                                          projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim",
+                                          replicates=5, ## 5 replicates
+                                          replicatetype="crossvalidate") ) ##possible values are: crossvalidate,bootstrap,subsample
+```
 

@@ -2,6 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-maxent_output*
+output/
 manuscript/
 data/studyarea/maxent*
