@@ -5,12 +5,21 @@ July 4, 2017
 ###1.1 Load packages  
 
 ```r
-library(dismo)
-library(raster)
-library(knitr)
-require(rgeos)
-require(rJava)
-knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
+library("dismo")
+library("raster")
+library("knitr")
+require("rgeos")
+```
+
+```
+## Warning: package 'rgeos' was built under R version 3.4.2
+```
+
+```r
+dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/server/libjvm.dylib')# a special step for Mac system
+require("rJava")
+#knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
+knitr::opts_knit$set(root.dir = '/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R')
 ```
 
 ###1.2 Set up the Maxent path  
@@ -30,7 +39,69 @@ utils::download.file(url="https://raw.githubusercontent.com/mrmaxent/Maxent/mast
 ```r
 # load GIS layers; here we used bioclim variables as an example (downloaded from worldclim.org)
 clim <- list.files("data/bioclim/",pattern=".bil$",full.names = T)
-clim <- stack(clim) ## stacking the bioclim variables to process them at one go
+clim <- raster::stack(clim) ## stacking the bioclim variables to process them at one go
+```
+
+```
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
+
+## Warning in .rasterFromGenericFile(x, type = objecttype, ...): assumed data
+## is unsigned. If this is not correct, use dataType(x) <- "INT2S"
 ```
 
 ###2.2 Occurrence data  
@@ -171,6 +242,7 @@ pder <- as.data.frame(rbind(p,a)) ## this makes a data frame with the environmen
 ###3.1 Simple implementation
 
 ```r
+# mod <- maxent(x=clim, p=occ_train)
 mod <- maxent(x=pder, ## env conditions
               p=pa,   ## 1:presence or 0:absence
               path=paste0(getwd(),"/output/maxent_outputs"), ## folder to store maxent output; if we do not specify a folder R will put the results in a temp file, and it gets messy to read those. . .
@@ -194,88 +266,88 @@ mod@results
 
 ```
 ##                                                                                          [,1]
-## X.Training.samples                                                                   655.0000
-## Regularized.training.gain                                                              0.7265
-## Unregularized.training.gain                                                            0.9604
+## X.Training.samples                                                                   656.0000
+## Regularized.training.gain                                                              0.8931
+## Unregularized.training.gain                                                            1.1257
 ## Iterations                                                                           500.0000
-## Training.AUC                                                                           0.8596
-## X.Background.points                                                                10575.0000
-## bio1.contribution                                                                     17.1627
-## bio10.contribution                                                                    20.4753
-## bio11.contribution                                                                     8.7616
-## bio12.contribution                                                                     8.4875
-## bio13.contribution                                                                     1.8276
-## bio14.contribution                                                                     0.7496
-## bio15.contribution                                                                     9.2740
-## bio16.contribution                                                                     0.6694
-## bio17.contribution                                                                     0.6045
-## bio18.contribution                                                                     0.9334
-## bio19.contribution                                                                     0.9610
-## bio2.contribution                                                                      1.0134
-## bio3.contribution                                                                     15.1186
-## bio4.contribution                                                                      1.3084
-## bio5.contribution                                                                      8.2928
-## bio6.contribution                                                                      3.3366
-## bio7.contribution                                                                      0.3255
-## bio8.contribution                                                                      0.1911
-## bio9.contribution                                                                      0.5069
-## bio1.permutation.importance                                                           16.4025
-## bio10.permutation.importance                                                          10.6769
-## bio11.permutation.importance                                                           3.4186
-## bio12.permutation.importance                                                           7.1080
-## bio13.permutation.importance                                                           3.0867
-## bio14.permutation.importance                                                           3.9966
-## bio15.permutation.importance                                                          20.4166
-## bio16.permutation.importance                                                           0.3416
-## bio17.permutation.importance                                                           0.5438
-## bio18.permutation.importance                                                           0.6744
-## bio19.permutation.importance                                                           1.3227
-## bio2.permutation.importance                                                            1.5541
-## bio3.permutation.importance                                                            2.9937
-## bio4.permutation.importance                                                           20.8722
-## bio5.permutation.importance                                                            1.2303
-## bio6.permutation.importance                                                            3.2102
-## bio7.permutation.importance                                                            1.0008
-## bio8.permutation.importance                                                            0.0737
-## bio9.permutation.importance                                                            1.0766
-## Entropy                                                                                8.5492
-## Prevalence..average.of.logistic.output.over.background.sites.                          0.2410
+## Training.AUC                                                                           0.8827
+## X.Background.points                                                                10576.0000
+## bio1.contribution                                                                     10.5286
+## bio10.contribution                                                                    14.6525
+## bio11.contribution                                                                     9.2267
+## bio12.contribution                                                                     5.2664
+## bio13.contribution                                                                     1.4055
+## bio14.contribution                                                                     3.3945
+## bio15.contribution                                                                     8.3590
+## bio16.contribution                                                                     0.2229
+## bio17.contribution                                                                     1.6418
+## bio18.contribution                                                                     0.5061
+## bio19.contribution                                                                     1.8747
+## bio2.contribution                                                                      3.1356
+## bio3.contribution                                                                     15.2163
+## bio4.contribution                                                                     20.3612
+## bio5.contribution                                                                      2.2551
+## bio6.contribution                                                                      0.9328
+## bio7.contribution                                                                      0.5337
+## bio8.contribution                                                                      0.1727
+## bio9.contribution                                                                      0.3138
+## bio1.permutation.importance                                                           20.0027
+## bio10.permutation.importance                                                           8.1664
+## bio11.permutation.importance                                                           3.4047
+## bio12.permutation.importance                                                           5.6861
+## bio13.permutation.importance                                                           3.7836
+## bio14.permutation.importance                                                           2.5005
+## bio15.permutation.importance                                                          21.0092
+## bio16.permutation.importance                                                           0.2352
+## bio17.permutation.importance                                                           1.4323
+## bio18.permutation.importance                                                           0.8477
+## bio19.permutation.importance                                                           1.5576
+## bio2.permutation.importance                                                            1.7975
+## bio3.permutation.importance                                                            8.5481
+## bio4.permutation.importance                                                           14.4981
+## bio5.permutation.importance                                                            0.9186
+## bio6.permutation.importance                                                            0.4939
+## bio7.permutation.importance                                                            3.9238
+## bio8.permutation.importance                                                            0.1315
+## bio9.permutation.importance                                                            1.0627
+## Entropy                                                                                8.3744
+## Prevalence..average.of.logistic.output.over.background.sites.                          0.2024
 ## Fixed.cumulative.value.1.cumulative.threshold                                          1.0000
-## Fixed.cumulative.value.1.logistic.threshold                                            0.0625
-## Fixed.cumulative.value.1.area                                                          0.8119
+## Fixed.cumulative.value.1.logistic.threshold                                            0.0693
+## Fixed.cumulative.value.1.area                                                          0.6404
 ## Fixed.cumulative.value.1.training.omission                                             0.0046
 ## Fixed.cumulative.value.5.cumulative.threshold                                          5.0000
-## Fixed.cumulative.value.5.logistic.threshold                                            0.1355
-## Fixed.cumulative.value.5.area                                                          0.6447
-## Fixed.cumulative.value.5.training.omission                                             0.0229
+## Fixed.cumulative.value.5.logistic.threshold                                            0.1498
+## Fixed.cumulative.value.5.area                                                          0.5140
+## Fixed.cumulative.value.5.training.omission                                             0.0198
 ## Fixed.cumulative.value.10.cumulative.threshold                                        10.0000
-## Fixed.cumulative.value.10.logistic.threshold                                           0.1833
-## Fixed.cumulative.value.10.area                                                         0.5157
-## Fixed.cumulative.value.10.training.omission                                            0.0473
-## Minimum.training.presence.cumulative.threshold                                         0.0200
-## Minimum.training.presence.logistic.threshold                                           0.0054
-## Minimum.training.presence.area                                                         0.9608
+## Fixed.cumulative.value.10.logistic.threshold                                           0.1983
+## Fixed.cumulative.value.10.area                                                         0.4168
+## Fixed.cumulative.value.10.training.omission                                            0.0503
+## Minimum.training.presence.cumulative.threshold                                         0.0065
+## Minimum.training.presence.logistic.threshold                                           0.0038
+## Minimum.training.presence.area                                                         0.9887
 ## Minimum.training.presence.training.omission                                            0.0000
-## X10.percentile.training.presence.cumulative.threshold                                 17.8502
-## X10.percentile.training.presence.logistic.threshold                                    0.2531
-## X10.percentile.training.presence.area                                                  0.3762
-## X10.percentile.training.presence.training.omission                                     0.0992
-## Equal.training.sensitivity.and.specificity.cumulative.threshold                       32.3187
-## Equal.training.sensitivity.and.specificity.logistic.threshold                          0.3702
-## Equal.training.sensitivity.and.specificity.area                                        0.2168
-## Equal.training.sensitivity.and.specificity.training.omission                           0.2168
-## Maximum.training.sensitivity.plus.specificity.cumulative.threshold                    25.9220
-## Maximum.training.sensitivity.plus.specificity.logistic.threshold                       0.3177
-## Maximum.training.sensitivity.plus.specificity.area                                     0.2765
-## Maximum.training.sensitivity.plus.specificity.training.omission                        0.1389
-## Balance.training.omission..predicted.area.and.threshold.value.cumulative.threshold     2.0374
-## Balance.training.omission..predicted.area.and.threshold.value.logistic.threshold       0.0965
-## Balance.training.omission..predicted.area.and.threshold.value.area                     0.7536
-## Balance.training.omission..predicted.area.and.threshold.value.training.omission        0.0076
-## Equate.entropy.of.thresholded.and.original.distributions.cumulative.threshold         11.3240
-## Equate.entropy.of.thresholded.and.original.distributions.logistic.threshold            0.1949
-## Equate.entropy.of.thresholded.and.original.distributions.area                          0.4881
-## Equate.entropy.of.thresholded.and.original.distributions.training.omission             0.0534
+## X10.percentile.training.presence.cumulative.threshold                                 19.0777
+## X10.percentile.training.presence.logistic.threshold                                    0.2778
+## X10.percentile.training.presence.area                                                  0.2967
+## X10.percentile.training.presence.training.omission                                     0.0991
+## Equal.training.sensitivity.and.specificity.cumulative.threshold                       31.5600
+## Equal.training.sensitivity.and.specificity.logistic.threshold                          0.3784
+## Equal.training.sensitivity.and.specificity.area                                        0.1908
+## Equal.training.sensitivity.and.specificity.training.omission                           0.1905
+## Maximum.training.sensitivity.plus.specificity.cumulative.threshold                    26.9357
+## Maximum.training.sensitivity.plus.specificity.logistic.threshold                       0.3417
+## Maximum.training.sensitivity.plus.specificity.area                                     0.2244
+## Maximum.training.sensitivity.plus.specificity.training.omission                        0.1524
+## Balance.training.omission..predicted.area.and.threshold.value.cumulative.threshold     1.2178
+## Balance.training.omission..predicted.area.and.threshold.value.logistic.threshold       0.0769
+## Balance.training.omission..predicted.area.and.threshold.value.area                     0.6292
+## Balance.training.omission..predicted.area.and.threshold.value.training.omission        0.0046
+## Equate.entropy.of.thresholded.and.original.distributions.cumulative.threshold         10.4315
+## Equate.entropy.of.thresholded.and.original.distributions.logistic.threshold            0.2021
+## Equate.entropy.of.thresholded.and.original.distributions.area                          0.4098
+## Equate.entropy.of.thresholded.and.original.distributions.training.omission             0.0549
 ```
 
 ###3.2 Predict function
@@ -302,7 +374,7 @@ head(ped3)
 ```
 
 ```
-## [1] 0.7553921 0.3420225 0.5019929 0.5993227 0.7655950 0.7684774
+## [1] 0.7505867 0.3894324 0.6704451 0.5421548 0.7688247 0.2289796
 ```
 
 ```r
@@ -322,11 +394,11 @@ print(mod_eval_train)
 
 ```
 ## class          : ModelEvaluation 
-## n presences    : 655 
+## n presences    : 656 
 ## n absences     : 10000 
-## AUC            : 0.8807075 
-## cor            : 0.4044683 
-## max TPR+TNR at : 0.3175671
+## AUC            : 0.9049668 
+## cor            : 0.4339494 
+## max TPR+TNR at : 0.3415669
 ```
 
 ```r
@@ -339,9 +411,9 @@ print(mod_eval_test) # training AUC may be higher than testing AUC
 ## class          : ModelEvaluation 
 ## n presences    : 657 
 ## n absences     : 10000 
-## AUC            : 0.8401474 
-## cor            : 0.3532565 
-## max TPR+TNR at : 0.3763733
+## AUC            : 0.8806019 
+## cor            : 0.3970985 
+## max TPR+TNR at : 0.3019269
 ```
 
 ```r
@@ -401,7 +473,7 @@ mod3 <- maxent(x=pder[c("bio1","bio11")],
                p=pa, 
               path=paste0(getwd(),"/output/maxent_outputs3_prj1"), 
               args=prepPara(userfeatures="LQ",
-                            betamultiplier=1,                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea") ) 
+                            betamultiplier=1,                      projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/studyarea") ) 
 
 # load the projected map
 ped <- raster(paste0(getwd(),"/output/maxent_outputs3_prj1/species_studyarea.asc"))
@@ -416,7 +488,7 @@ mod3 <- maxent(x=pder[c("bio1","bio11")],
                p=pa, 
               path=paste0(getwd(),"/output/maxent_outputs3_prj2"), 
               args=prepPara(userfeatures="LQ",
-                            betamultiplier=1,                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+                            betamultiplier=1,                      projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 # plot the map
 ped <- raster(paste0(getwd(),"/output/maxent_outputs3_prj2/species_bioclim.asc"))
 plot(ped)
@@ -431,7 +503,7 @@ mod3_beta1 <- maxent(x=pder[c("bio1","bio11")],
               path=paste0(getwd(),"/output/maxent_outputs3_prj3"), 
               args=prepPara(userfeatures="LQ",
                             betamultiplier=100, ## for an extreme example, set beta as 100
-                            projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+                            projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 ped3 <- raster(paste0(getwd(),"/output/maxent_outputs3_prj3/species_bioclim.asc"))
 plot(ped-ped3) ## quickly check the difference between the two predictions
 ```
@@ -448,7 +520,7 @@ mod4_clamp <- maxent(x=pder[c("bio1","bio11")],
                      args=prepPara(userfeatures="LQ",
                                    betamultiplier=1,
                                    doclamp = TRUE,
-                                   projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim")) 
+                                   projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim")) 
 
 mod4_noclamp <- maxent(x=pder[c("bio1","bio11")], 
                        p=pa, 
@@ -456,7 +528,7 @@ mod4_noclamp <- maxent(x=pder[c("bio1","bio11")],
                        args=prepPara(userfeatures="LQ",
                                       betamultiplier=1,
                                       doclamp = FALSE,
-                                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+                                      projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 
 
 ped_clamp <- raster(paste0(getwd(),"/output/maxent_outputs4_clamp/species_bioclim.asc") )
@@ -480,7 +552,7 @@ mod4_cross <- maxent(x=pder[c("bio1","bio11")], p=pa,
                             args=prepPara(userfeatures="LQ",
                                           betamultiplier=1,
                                           doclamp = TRUE,
-                                          projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim",
+                                          projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim",
                                           replicates=5, ## 5 replicates
                                           replicatetype="crossvalidate") ) ##possible values are: crossvalidate,bootstrap,subsample
 ```

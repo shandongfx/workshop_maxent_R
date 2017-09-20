@@ -2,21 +2,26 @@
 title: "A brief tutorial on runing Maxent in R"
 author: "Xiao Feng, Cassondra Walker, Fikirte Gebresenbet"
 date: "July 4, 2017"
-output: 
-  html_document: 
-    toc: true
-    toc_depth: 3
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  html_document:
     keep_md: yes
+    toc: yes
+    toc_depth: 3
 ---
 ##1. Setup the working environment  
 ###1.1 Load packages  
 ```{r setup,message=FALSE}
-library(dismo)
-library(raster)
-library(knitr)
-require(rgeos)
-require(rJava)
-knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
+library("dismo")
+library("raster")
+library("knitr")
+require("rgeos")
+dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/server/libjvm.dylib')# a special step for Mac system
+require("rJava")
+#knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
+knitr::opts_knit$set(root.dir = '/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R')
 ```
 
 ###1.2 Set up the Maxent path  
@@ -35,7 +40,7 @@ utils::download.file(url="https://raw.githubusercontent.com/mrmaxent/Maxent/mast
 ```{r load rasters}
 # load GIS layers; here we used bioclim variables as an example (downloaded from worldclim.org)
 clim <- list.files("data/bioclim/",pattern=".bil$",full.names = T)
-clim <- stack(clim) ## stacking the bioclim variables to process them at one go
+clim <- raster::stack(clim) ## stacking the bioclim variables to process them at one go
 ```
 
 ###2.2 Occurrence data  
@@ -141,6 +146,7 @@ pder <- as.data.frame(rbind(p,a)) ## this makes a data frame with the environmen
 ##3 Maxent models
 ###3.1 Simple implementation
 ```{r simple maxent model}
+# mod <- maxent(x=clim, p=occ_train)
 mod <- maxent(x=pder, ## env conditions
               p=pa,   ## 1:presence or 0:absence
               path=paste0(getwd(),"/output/maxent_outputs"), ## folder to store maxent output; if we do not specify a folder R will put the results in a temp file, and it gets messy to read those. . .
@@ -236,7 +242,7 @@ mod3 <- maxent(x=pder[c("bio1","bio11")],
                p=pa, 
               path=paste0(getwd(),"/output/maxent_outputs3_prj1"), 
               args=prepPara(userfeatures="LQ",
-                            betamultiplier=1,                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/studyarea") ) 
+                            betamultiplier=1,                      projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/studyarea") ) 
 
 # load the projected map
 ped <- raster(paste0(getwd(),"/output/maxent_outputs3_prj1/species_studyarea.asc"))
@@ -247,7 +253,7 @@ mod3 <- maxent(x=pder[c("bio1","bio11")],
                p=pa, 
               path=paste0(getwd(),"/output/maxent_outputs3_prj2"), 
               args=prepPara(userfeatures="LQ",
-                            betamultiplier=1,                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+                            betamultiplier=1,                      projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 # plot the map
 ped <- raster(paste0(getwd(),"/output/maxent_outputs3_prj2/species_bioclim.asc"))
 plot(ped)
@@ -258,7 +264,7 @@ mod3_beta1 <- maxent(x=pder[c("bio1","bio11")],
               path=paste0(getwd(),"/output/maxent_outputs3_prj3"), 
               args=prepPara(userfeatures="LQ",
                             betamultiplier=100, ## for an extreme example, set beta as 100
-                            projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+                            projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 ped3 <- raster(paste0(getwd(),"/output/maxent_outputs3_prj3/species_bioclim.asc"))
 plot(ped-ped3) ## quickly check the difference between the two predictions
 
@@ -273,7 +279,7 @@ mod4_clamp <- maxent(x=pder[c("bio1","bio11")],
                      args=prepPara(userfeatures="LQ",
                                    betamultiplier=1,
                                    doclamp = TRUE,
-                                   projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim")) 
+                                   projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim")) 
 
 mod4_noclamp <- maxent(x=pder[c("bio1","bio11")], 
                        p=pa, 
@@ -281,7 +287,7 @@ mod4_noclamp <- maxent(x=pder[c("bio1","bio11")],
                        args=prepPara(userfeatures="LQ",
                                       betamultiplier=1,
                                       doclamp = FALSE,
-                                      projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim") ) 
+                                      projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim") ) 
 
 
 ped_clamp <- raster(paste0(getwd(),"/output/maxent_outputs4_clamp/species_bioclim.asc") )
@@ -299,7 +305,7 @@ mod4_cross <- maxent(x=pder[c("bio1","bio11")], p=pa,
                             args=prepPara(userfeatures="LQ",
                                           betamultiplier=1,
                                           doclamp = TRUE,
-                                          projectionlayers="D:/projects/2017_7_workshop_enm_R/data/bioclim",
+                                          projectionlayers="/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/data/bioclim",
                                           replicates=5, ## 5 replicates
                                           replicatetype="crossvalidate") ) ##possible values are: crossvalidate,bootstrap,subsample
 

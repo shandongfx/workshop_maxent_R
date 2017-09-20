@@ -19,7 +19,7 @@ opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
 library(dismo)
 library(raster)
 library(knitr)
-knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
+#knitr::opts_knit$set(root.dir = 'd:/projects/2017_7_workshop_enm_R')
 ```
 
 ###1.2 set up the Maxent path  
