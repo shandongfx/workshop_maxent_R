@@ -10,12 +10,17 @@ output:
     keep_md: yes
     toc: yes
     toc_depth: 3
----
-##1. Setup the working environment  
-###1.1 Load packages  
-```{r setup,message=FALSE}
+—dsadas
+## 1. Set up the working environment  
+
+### 1.1 Load packages  
+Running Maxent in R requires several packages. Specifically, the "dismo" package, which contains the functions for maximum entropy species distribution modeling. However, the "rgbif" package gives access to the GBIF database for occurrence location downloads, (https://cran.r-project.org/web/packages/rgbif/rgbif.pdf), the "raster" package provides functions for working with gridded data ( https://cran.r-project.org/web/packages/raster/raster.pdf), the "rgeos" package provides the ability to manipulate spatial data (https://cran.rstudio.com/web/packages/rgeos/rgeos.pdf), and the "knitr" package allows for report generation and easy display of modeling output (https://cran.r-project.org/web/packages/knitr/knitr.pdf), which are needed to complete the modeling process.  
+
+##### Thread 1  
+```{r setup1,message=FALSE}
 library("dismo")
 library("raster")
+library("rgbif")
 library("knitr")
 require("rgeos")
 dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/server/libjvm.dylib')# a special step for Mac system

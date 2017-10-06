@@ -5,3 +5,5 @@
 output/
 manuscript/
 data/studyarea/maxent*
+.DS_Store
+.DS_Store?
