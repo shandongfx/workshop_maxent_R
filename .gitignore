@@ -2,9 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
-output/
-manuscript/
-data/studyarea/maxent*
 .DS_Store
 .DS_Store?
-code/text code
+output/
+data/
+
