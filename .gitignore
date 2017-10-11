@@ -4,6 +4,7 @@
 .Ruserdata
 .DS_Store
 .DS_Store?
+*.Rproj
 output/
 data/
-
+olffiles/
