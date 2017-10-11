@@ -150,7 +150,7 @@ plot(clim[[1]])  # to the first layer of the bioclim layers as a reference
 plot(occ_unique, add = TRUE)  # plot the oc_unique on the above raster layer
 ```
 
-![](Appendix1_case_study_files/figure-html/clean data2-1.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/clean_data2-1.png)<!-- -->
 
 In the figure above, we can see several points that appear outside the known distribution of _Dasypus novemcinctus_ (North and South America) and we need to remove these from our occurrence dataset. To do this, we only kept points that have longitudes between -110° and -40°. 
 
@@ -188,7 +188,7 @@ plot(clim[[1]])
 plot(occ_final, add = T, col = "red")  # the 'add=T' tells R to put the incoming data on the existing layer
 ```
 
-![](Appendix1_case_study_files/figure-html/clean data4-1.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/clean_data4-1.png)<!-- -->
 
 ###2.3 Set up study area
 We create a buffer around our occurrence locations and define this as our study region, which will allow us to avoid sampling from a broad background. We establish a four-decimal-degree buffer around the occurrence points. To make sure that our buffer encompasses the appropriate area, we plot the occurrence points, the first environmental layer, and the buffer polygon.
@@ -207,7 +207,7 @@ plot(occ_final, add = T, col = "red")  # adds occurrence data to the plot
 plot(occ_buff, add = T, col = "blue")  # adds buffer polygon to the plot
 ```
 
-![](Appendix1_case_study_files/figure-html/set up study area1-1.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/set_up_study_area1-1.png)<!-- -->
 
 With a defined study area and the environmental layers stacked, we then clip the layers to the extent of our study area. However, for ease of processing, we do this in two steps rather than one. First, we create a coarse rectangular shaped study area around the study area to reduce the size of environmental data and then extract by *mask* using the buffer we create to more accurately clip environmental layers. This approach could be faster than directly masking. We save the cropped environmental layers as .asc (ascii files) as inputs for Maxent.
 
@@ -252,7 +252,7 @@ plot(bg,add=T)
 plot(occ_final,add=T,col="red")
 ```
 
-![](Appendix1_case_study_files/figure-html/set up study area3-1.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/set_up_study_area3-1.png)<!-- -->
 
 ###2.4 Split occurrence data into training & testing
 We randomly selected 50% of the occurrence data for model training and used the remaining for model testing. To make our experiment reproducible (i.e., select the same set of points), we used a static seed via *set.seed(1)* function.
@@ -508,7 +508,7 @@ thd2 <- threshold(mod_eval_train, "spec_sens")  # highest TSS
 plot(ped1 >= thd1)
 ```
 
-![](Appendix1_case_study_files/figure-html/model evaluation2-1.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/model_evaluation2-1.png)<!-- -->
 
 ##4 Maxent parameters
 ###4.1 Select features
@@ -579,7 +579,7 @@ ped <- raster(paste0("../output/maxent_outputs3_prj1/species_studyarea.asc"))
 plot(ped)
 ```
 
-![](Appendix1_case_study_files/figure-html/specify projection layers/data table-1.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/specify_projection_layers_data_table-1.png)<!-- -->
 
 ```r
 # we can also project on a broader map, but please 
@@ -595,7 +595,7 @@ ped <- raster(paste0("../output/maxent_outputs3_prj2/species_bioclim.asc"))
 plot(ped)
 ```
 
-![](Appendix1_case_study_files/figure-html/specify projection layers/data table-2.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/specify_projection_layers_data_table-2.png)<!-- -->
 
 ```r
 # simply check the difference if we used a different betamultiplier
@@ -610,7 +610,7 @@ ped3 <- raster(paste0("../output/maxent_outputs3_prj3/species_bioclim.asc"))
 plot(ped-ped3) ## quickly check the difference between the two predictions
 ```
 
-![](Appendix1_case_study_files/figure-html/specify projection layers/data table-3.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/specify_projection_layers_data_table-3.png)<!-- -->
 
 ###4.4 Clamping function
 
@@ -632,13 +632,13 @@ ped_noclamp <- raster(paste0("../output/maxent_outputs4_noclamp/species_bioclim.
 plot(stack(ped_clamp, ped_noclamp))
 ```
 
-![](Appendix1_case_study_files/figure-html/clamping function-1.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/clamping_function-1.png)<!-- -->
 
 ```r
 plot(ped_clamp - ped_noclamp)
 ```
 
-![](Appendix1_case_study_files/figure-html/clamping function-2.png)<!-- -->
+![](Appendix1_case_study_files/figure-html/clamping_function-2.png)<!-- -->
 
 ```r
 ## we may notice small differences, especially clamp shows

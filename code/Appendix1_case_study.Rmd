@@ -31,7 +31,7 @@ library("rJava")
 
 #####Thread 3
 settings for the R-markdown document
-```{r setup knit}
+```{r setup_knit}
 library("knitr")
 knitr::opts_knit$set(root.dir = '/Users/iel82user/Google Drive/1_osu_lab/projects/2017_7_workshop_enm_R/code')
 opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
@@ -59,7 +59,7 @@ utils::download.file(url="https://raw.githubusercontent.com/mrmaxent/Maxent/mast
 In our example, we use bioclimatic variables (downloaded from worldclim.org) as input environmental layers. We stack our environmental layers so that they can be processed simultaneously.  
 
 #####Thread 5 
-```{r load rasters, message=FALSE, warning=FALSE}
+```{r load_rasters, message=FALSE, warning=FALSE}
 # prepare folders for data input and output
 if(!file.exists("../data")) dir.create("../data")
 if(!file.exists("../data/bioclim")) dir.create("../data/bioclim")
@@ -105,7 +105,7 @@ if(file.exists("../data/occ_raw")){
 Since some of our records do not have appropriate coordinates and some have missing locational data, we need to remove them from our dataset. To do this, we creatd a new dataset named “occ_clean”, which is a subset of the “occ_raw” dataset where records with missing latitude and/or longitude are removed. This particular piece of code also returns the number of records that are removed from the dataset. Additionally, we remove duplicate records and create a subset of the cleaned data with the duplicates removed. 
 
 #####Thread 7
-```{r clean data1}
+```{r clean_data1}
 # remove erroneous coordinates, where either the latitude or longitude is missing
 occ_clean <- subset(occ_raw,(!is.na(lat))&(!is.na(lon))) #  "!" means the opposite logic value
 cat(nrow(occ_raw)-nrow(occ_clean), "records are removed")
@@ -119,7 +119,7 @@ cat(nrow(occ_clean)-nrow(occ_unique), "records are removed")
 Up to this point we have been working with a data frame, but it has no spatial relationship with environmental layers. So we need to make the data spatial. Once our data is spatial we can use the *plot* function to see the occurrence data and allow us to check for data points that appear to be erroneous.
 
 #####Thread 8
-```{r clean data2}
+```{r clean_data2}
 # make occ spatial
 coordinates(occ_unique) <- ~ lon + lat
 ## look for erroneous points
@@ -130,7 +130,7 @@ plot(occ_unique,add=TRUE) # plot the oc_unique on the above raster layer
 In the figure above, we can see several points that appear outside the known distribution of _Dasypus novemcinctus_ (North and South America) and we need to remove these from our occurrence dataset. To do this, we only kept points that have longitudes between -110° and -40°. 
 
 #####Thread 9
-```{r clean data3}
+```{r clean_data3}
 # remove erroneous points (i.e., only keep good records)
 occ_unique <- occ_unique[which(occ_unique$lon>-110 &
                                  occ_unique$lon < -40),]
@@ -139,7 +139,7 @@ occ_unique <- occ_unique[which(occ_unique$lon>-110 &
 We want to use only one occurrence point per pixel, so we need to thin our occurrence data.
 
 #####Thread 10
-```{r clean data4}
+```{r clean_data4}
 # thin occ data (keep one occurrence point per cell)
 cells <- cellFromXY(clim[[1]],occ_unique)
 dups <- duplicated(cells)
@@ -158,7 +158,7 @@ plot(occ_final,add=T,col="red") # the 'add=T' tells R to put the incoming data o
 We create a buffer around our occurrence locations and define this as our study region, which will allow us to avoid sampling from a broad background. We establish a four-decimal-degree buffer around the occurrence points. To make sure that our buffer encompasses the appropriate area, we plot the occurrence points, the first environmental layer, and the buffer polygon.
 
 #####Thread 11
-```{r set up study area1}
+```{r set_up_study_area1}
 # this creates a 4-decimal-degree buffer around the occurrence data 
 occ_buff <- buffer(occ_final,4) 
 
@@ -172,7 +172,7 @@ plot(occ_buff,add=T,col="blue") # adds buffer polygon to the plot
 With a defined study area and the environmental layers stacked, we then clip the layers to the extent of our study area. However, for ease of processing, we do this in two steps rather than one. First, we create a coarse rectangular shaped study area around the study area to reduce the size of environmental data and then extract by *mask* using the buffer we create to more accurately clip environmental layers. This approach could be faster than directly masking. We save the cropped environmental layers as .asc (ascii files) as inputs for Maxent.
 
 #####Thread 12
-```{r set up study area 2}
+```{r set_up_study_area2}
 # crop study area to a manageable extent (rectangle shaped)
 studyArea <- crop(clim,extent(occ_buff))  
 
@@ -192,7 +192,7 @@ writeRaster(studyArea,
 In the next step, we selected 10,000 random background points from the study area. To make our experiment reproducible (i.e., select the same set of points), we used a static seed via *set.seed(1)* function. Then, we plotted the background points together with the study area and occurrence data.
 
 #####Thread 13
-```{r set up study area3}
+```{r set_up_study_area3}
 # select background points from this buffered area; when the number provided 
 # to set.seed() function, the same random sample will be selected in the next line			
 # use this code before the sampleRandom function every time, if you want to get
@@ -214,7 +214,7 @@ plot(occ_final,add=T,col="red")
 We randomly selected 50% of the occurrence data for model training and used the remaining for model testing. To make our experiment reproducible (i.e., select the same set of points), we used a static seed via *set.seed(1)* function.
 
 #####Thread 14
-```{r cut occ into training & testing}
+```{r cut_occ_into_training_testing}
 # get the same random sample for training and testing
 set.seed(1) 
 
@@ -229,7 +229,7 @@ occ_test <- occ_final[-selected,] # this is the opposite of the selection which 
 The data input can either be spatial or tabular. In our example, we use the tabular format, which can be potentially more flexible. We extract environmental conditions for background, training, and testing points in a dataframe format. 
 
 #####Thread 15
-```{r prepare data for maxent1,message=FALSE}
+```{r prepare_data_for_maxent1,message=FALSE}
 # extracting env conditions for training occ from the raster stack;
 # a data frame is returned (i.e multiple columns)
 p <- extract(clim,occ_train) 
@@ -242,7 +242,7 @@ a <- extract(clim,bg)
 Maxent reads a "1" as presence and "0" as pseudo-absence. Thus, we need to assign a "1" to the training environmental conditions and a "0" for the background. We create a set of rows with the same number as the training and testing data, and put the value of "1" for each cell and a "0" for background. We combine the "1"s and "0"s into a vector that was added to the dataframe containing the environmental conditions associated with the testing and background conditions.
 
 #####Thread 16
-```{r prepare data for maxent2,message=FALSE}
+```{r prepare_data_for_maxent2,message=FALSE}
 # repeat the number 1 as many numbers as the number of rows in p, 
 # and repeat 0 as the rows of background points
 pa <- c(rep(1,nrow(p)), rep(0,nrow(a))) 
@@ -260,7 +260,7 @@ pder <- as.data.frame(rbind(p,a))
 ###3.1 Simple implementation
 
 #####Thread 17
-```{r simple maxent model}
+```{r simple_maxent_model}
 # train Maxent with spatial data
 # mod <- maxent(x=clim,p=occ_train)
 
@@ -306,7 +306,7 @@ hist(ped3)# creates a histogram of the prediction
 To evaluate models, we use the *evaluate* function from the "dismo" package. Evaluation indices include AUC, TSS, Sensitivity, Specificity, etc.
 
 #####Thread 19
-```{r model evaluation1}
+```{r model_evaluation1}
 # using "training data" to evaluate 
 #p & a are dataframe/s (the p and a are the training presence and background points)
 mod_eval_train <- dismo::evaluate(p=p,a=a,model=mod) 
@@ -319,7 +319,7 @@ print(mod_eval_test) # training AUC may be higher than testing AUC
 To threshold our continuous predictions of suitability into binary predictions we use the threshold function of the "dismo" package. To plot the binary prediction, we plot the predictions that are larger than the threshold.  
 
 #####Thread 20
-```{r model evaluation2}
+```{r model_evaluation2}
 # calculate thresholds of models
 thd1 <- threshold(mod_eval_train,"no_omission") # 0% omission rate 
 thd2 <- threshold(mod_eval_train,"spec_sens") # highest TSS
@@ -332,7 +332,7 @@ plot(ped1>=thd1)
 ###4.1 Select features
 
 #####Thread 21
-```{r detailed parameters}
+```{r detailed_parameters}
 # load the function that prepares parameters for maxent
 source("../code/Appendix2_prepPara.R")
 
@@ -357,7 +357,7 @@ mod1_lq <- maxent(x=pder[c("bio1","bio4","bio11")],
 ###4.2 Change beta-multiplier
 
 #####Thread 22
-```{r beta-multiplier,eval=FALSE}
+```{r beta_multiplier,eval=FALSE}
 #change betamultiplier for all features
 mod2 <- maxent(x=pder[c("bio1","bio4","bio11")], 
                p=pa, 
@@ -378,7 +378,7 @@ mod2 <- maxent(x=pder[c("bio1","bio4","bio11")],
 ###4.3 Specify projection layers
 
 #####Thread 23
-```{r specify projection layers/data table}
+```{r specify_projection_layers_data_table}
 # note: (1) the projection layers must exist in the hard disk (as relative to computer RAM); 
 # (2) the names of the layers (excluding the name extension) must match the names 
 # of the predictor variables; 
@@ -421,7 +421,7 @@ plot(ped-ped3) ## quickly check the difference between the two predictions
 ###4.4 Clamping function
 
 #####Thread 24
-```{r clamping function}
+```{r clamping_function}
 # enable or disable clamping function; note that clamping function is involved when projecting
 mod4_clamp <- maxent(x=pder[c("bio1","bio11")],
                      p=pa,
@@ -449,7 +449,7 @@ plot(ped_clamp - ped_noclamp)
 ###4.5 Cross validation
 
 #####Thread 25
-```{r cross validation,eval=FALSE}
+```{r cross_validation,eval=FALSE}
 mod4_cross <- maxent(x=pder[c("bio1","bio11")], p=pa, 
                             path=paste0("../output/maxent_outputs4_cross"), 
                             args=prepPara(userfeatures="LQ",
